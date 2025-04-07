@@ -1,5 +1,5 @@
 /*============================================================================
-Copyright (c) 2018-2025 Raspberry Pi Holdings Ltd.
+Copyright (c) 2018-2025 Raspberry Pi
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -476,9 +476,6 @@ void ejecter_init (EjecterPlugin *ej)
     g_signal_connect (ej->monitor, "drive-disconnected", G_CALLBACK (handle_drive_out), ej);
 
     log_init_mounts (ej);
-
-    /* Show the widget and return. */
-    gtk_widget_show_all (ej->plugin);
 }
 
 void ejecter_destructor (gpointer user_data)

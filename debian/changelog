@@ -1,3 +1,9 @@
+pplug-ejecter (0.25) bookworm; urgency=medium
+
+  * Set initial state of icon correctly
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 07 Apr 2025 14:08:57 +0100
+
 pplug-ejecter (0.24) bookworm; urgency=medium
 
   * First hybrid package version

@@ -63,6 +63,11 @@ typedef struct {
 /* Global data                                                                */
 /*----------------------------------------------------------------------------*/
 
+conf_table_t conf_table[2] = {
+    {CONF_TYPE_BOOL, "autohide", N_("Hide icon when no devices"),   NULL},
+    {CONF_TYPE_NONE,  NULL,      NULL,                              NULL}
+};
+
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
 /*----------------------------------------------------------------------------*/
@@ -502,8 +507,12 @@ static GtkWidget *ejecter_constructor (LXPanel *panel, config_setting_t *setting
     ej->plugin = gtk_button_new ();
     lxpanel_plugin_set_data (ej->plugin, ej, ejecter_destructor);
 
+    /* Set config defaults */
+    ej->autohide = TRUE;
+
     /* Read config */
-    if (!config_setting_lookup_int (ej->settings, "AutoHide", &ej->autohide)) ej->autohide = TRUE;
+    conf_table[0].value = (void *) &ej->autohide;
+    lxplug_read_settings (ej->settings, conf_table);
 
     ejecter_init (ej);
 
@@ -541,7 +550,7 @@ static gboolean ejecter_apply_configuration (gpointer user_data)
 {
     EjecterPlugin *ej = lxpanel_plugin_get_data (GTK_WIDGET (user_data));
 
-    config_group_set_int (ej->settings, "AutoHide", ej->autohide);
+    lxplug_write_settings (ej->settings, conf_table);
 
     ejecter_update_display (ej);
     return FALSE;
@@ -550,19 +559,16 @@ static gboolean ejecter_apply_configuration (gpointer user_data)
 /* Display configuration dialog */
 static GtkWidget *ejecter_configure (LXPanel *panel, GtkWidget *plugin)
 {
-    EjecterPlugin *ej = lxpanel_plugin_get_data (plugin);
-
-    return lxpanel_generic_config_dlg(_("Ejecter"), panel,
+    return lxpanel_generic_config_dlg_new (_(PLUGIN_TITLE), panel,
         ejecter_apply_configuration, plugin,
-        _("Hide icon when no devices"), &ej->autohide, CONF_TYPE_BOOL,
-        NULL);
+        conf_table);
 }
 
 FM_DEFINE_MODULE (lxpanel_gtk, ejecter)
 
 /* Plugin descriptor */
 LXPanelPluginInit fm_module_init_lxpanel_gtk = {
-    .name = N_("Ejecter"),
+    .name = N_(PLUGIN_TITLE),
     .description = N_("Ejects mounted drives"),
     .new_instance = ejecter_constructor,
     .reconfigure = ejecter_configuration_changed,

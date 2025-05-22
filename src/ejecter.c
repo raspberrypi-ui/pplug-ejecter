@@ -117,7 +117,7 @@ static gboolean was_ejected (EjecterPlugin *ej, GDrive *drive)
         if (el->drv == drive)
         {
             ejected = TRUE;
-            if (el->seq != -1) lxpanel_notify_clear (el->seq);
+            if (el->seq != -1) wrap_notify_clear (el->seq);
             ej->ejdrives = g_list_remove (ej->ejdrives, el);
             g_free (el);
         }
@@ -245,7 +245,7 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
     DEBUG ("DRIVE REMOVED %s", g_drive_get_name (drive));
 
     if (was_mounted (ej, drive) && !was_ejected (ej, drive))
-        lxpanel_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
+        wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);
@@ -274,13 +274,13 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     {
         DEBUG ("EJECT COMPLETE");
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), g_drive_get_name (drv));
-        add_seq_for_drive (ej, drv, lxpanel_notify (ej->panel, buffer));
+        add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
     else
     {
         DEBUG ("EJECT FAILED");
         buffer = g_strdup_printf (_("Failed to eject %s\n%s"), g_drive_get_name (drv), err->message);
-        lxpanel_notify (ej->panel, buffer);
+        wrap_notify (ej->panel, buffer);
     }
     g_free (buffer);
 }

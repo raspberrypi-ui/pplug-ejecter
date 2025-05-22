@@ -38,12 +38,6 @@ extern "C" {
     const char *package_name (void) { return GETTEXT_PACKAGE; };
 }
 
-void WayfireEjecter::icon_size_changed_cb (void)
-{
-    ej->icon_size = icon_size;
-    ejecter_update_display (ej);
-}
-
 void WayfireEjecter::command (const char *cmd)
 {
     ejecter_control_msg (ej, cmd);
@@ -55,9 +49,14 @@ bool WayfireEjecter::set_icon (void)
     return false;
 }
 
-void WayfireEjecter::settings_changed_cb (void)
+void WayfireEjecter::read_settings (void)
 {
     ej->autohide = autohide;
+}
+
+void WayfireEjecter::settings_changed_cb (void)
+{
+    read_settings ();
     ejecter_update_display (ej);
 }
 
@@ -71,21 +70,17 @@ void WayfireEjecter::init (Gtk::HBox *container)
     /* Setup structure */
     ej = g_new0 (EjecterPlugin, 1);
     ej->plugin = (GtkWidget *)((*plugin).gobj());
-    ej->icon_size = icon_size;
     icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WayfireEjecter::set_icon));
 
     /* Add long press for right click */
     gesture = add_longpress_default (*plugin);
 
     /* Initialise the plugin */
+    read_settings ();
     ejecter_init (ej);
 
     /* Setup callbacks */
-    icon_size.set_callback (sigc::mem_fun (*this, &WayfireEjecter::icon_size_changed_cb));
-
     autohide.set_callback (sigc::mem_fun (*this, &WayfireEjecter::settings_changed_cb));
-
-    settings_changed_cb ();
 }
 
 WayfireEjecter::~WayfireEjecter()

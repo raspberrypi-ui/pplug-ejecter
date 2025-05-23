@@ -1,2 +1,2 @@
-usr/lib/${DEB_HOST_MULTIARCH}/lxpanel/plugins/ejecter.so
-usr/share/locale/*/LC_MESSAGES/lxplug_ejecter.mo
+usr/lib/${DEB_HOST_MULTIARCH}/lxpanel-pi/ejecter.so
+usr/share/locale/*/LC_MESSAGES/lpplug_ejecter.mo

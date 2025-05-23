@@ -1,14 +1,14 @@
-# English translations for wf-panel-pi package.
-# Copyright (C) 2024 Raspberry Pi Ltd
+# English translations for plugin package.
+# Copyright (C) 2025 Raspberry Pi
 # This file is distributed under the same license as the wf-panel-pi package.
-# Simon Long <simon@raspberrypi.com>, 2024.
+# Simon Long <simon@raspberrypi.com>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-20 07:49+0000\n"
-"PO-Revision-Date: 2017-03-06 14:18+0000\n"
+"POT-Creation-Date: 2025-05-23 10:36+0100\n"
+"PO-Revision-Date: 2025-05-23 10:36+0100\n"
 "Last-Translator: Simon Long <simon@raspberrypi.com>\n"
 "Language-Team: English (British)\n"
 "Language: en_GB\n"
@@ -17,7 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/ejecter.c:228
+#: ../src/ejecter.c:67
+msgid "Hide icon when no devices"
+msgstr "Hide Icon when No Devices"
+
+#: ../src/ejecter.c:248
 msgid ""
 "Drive was removed without ejecting\n"
 "Please use menu to eject before removal"
@@ -25,7 +29,7 @@ msgstr ""
 "Drive was removed without ejecting\n"
 "Please use menu to eject before removal"
 
-#: ../src/ejecter.c:256
+#: ../src/ejecter.c:276
 #, c-format
 msgid ""
 "%s has been ejected\n"
@@ -34,7 +38,7 @@ msgstr ""
 "%s has been ejected\n"
 "It is now safe to remove the device"
 
-#: ../src/ejecter.c:262
+#: ../src/ejecter.c:282
 #, c-format
 msgid ""
 "Failed to eject %s\n"
@@ -43,18 +47,14 @@ msgstr ""
 "Failed to eject %s\n"
 "%s"
 
-#: ../src/ejecter.c:440
+#: ../src/ejecter.c:460
 msgid "Select a drive in menu to eject safely"
 msgstr "Select a drive in menu to eject safely"
 
-#: ../src/ejecter.c:559 ../src/ejecter.c:569 ../src/ejecter.cpp:40
-msgid "Ejecter"
-msgstr "Ejecter"
-
-#: ../src/ejecter.c:561 ../src/ejecter.cpp:36
-msgid "Hide icon when no devices"
-msgstr "Hide icon when no devices"
-
-#: ../src/ejecter.c:570
+#: ../src/ejecter.c:573
 msgid "Ejects mounted drives"
 msgstr "Ejects mounted drives"
+
+#: ../src/ejecter.h:32
+msgid "Ejecter"
+msgstr "Ejecter"

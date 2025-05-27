@@ -1,3 +1,9 @@
+pplug-ejecter (0.26) trixie; urgency=medium
+
+  * Modify for lxpanel-pi
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 27 May 2025 07:34:39 +0100
+
 pplug-ejecter (0.25) bookworm; urgency=medium
 
   * Set initial state of icon correctly

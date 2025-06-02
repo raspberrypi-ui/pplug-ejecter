@@ -374,6 +374,7 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
     char buffer[1024];
     GList *vols;
     GVolume *v;
+    GIcon *ic;
     GtkWidget *item, *icon, *eject;
 
     vols = g_drive_get_volumes (d);
@@ -392,7 +393,9 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
         }
     }
     strcat (buffer, ")");
-    icon = gtk_image_new_from_gicon (g_drive_get_icon (d), GTK_ICON_SIZE_BUTTON);
+    ic = g_drive_get_icon (d);
+    icon = gtk_image_new_from_gicon (ic, wrap_icon_size (ej) >= 32 ? GTK_ICON_SIZE_LARGE_TOOLBAR : GTK_ICON_SIZE_BUTTON);
+    g_object_unref (ic);
 
     item = wrap_new_menu_item (ej, buffer, 40, NULL);
     lxpanel_plugin_update_menu_icon (item, icon);

@@ -22,3 +22,4 @@ add_project_arguments('-DPLUGIN_NAME="' + meson.project_name() + '"', language :
 
 subdir('src')
 subdir('po')
+subdir('data')

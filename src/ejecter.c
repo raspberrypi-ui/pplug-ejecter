@@ -420,7 +420,7 @@ static void ejecter_button_clicked (GtkWidget *, EjecterPlugin * ej)
 /* Handler for system config changed message from panel */
 void ejecter_update_display (EjecterPlugin * ej)
 {
-    wrap_set_taskbar_icon (ej, ej->tray_icon, "media-eject");
+    wrap_set_taskbar_icon (ej, ej->tray_icon, "plugin-eject");
     update_icon (ej);
 }
 
@@ -456,7 +456,7 @@ void ejecter_init (EjecterPlugin *ej)
     /* Allocate icon as a child of top level */
     ej->tray_icon = gtk_image_new ();
     gtk_container_add (GTK_CONTAINER (ej->plugin), ej->tray_icon);
-    wrap_set_taskbar_icon (ej, ej->tray_icon, "media-eject");
+    wrap_set_taskbar_icon (ej, ej->tray_icon, "plugin-eject");
     gtk_widget_set_tooltip_text (ej->tray_icon, _("Select a drive in menu to eject safely"));
 
     /* Set up button */

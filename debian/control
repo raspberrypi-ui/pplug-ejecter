@@ -10,12 +10,12 @@ Build-Depends:
 Standards-Version: 4.5.1
 Homepage: http://raspberrypi.com/
 
-Package: lxplug-ejecter
+Package: lpplug-ejecter
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
  lxpanel-pi, eject, pplug-ejecter-data
-Description: Ejecter plugin for lxpanel
- Plugin for lxpanel to safely eject USB devices before removal.
+Description: Ejecter plugin for lxpanel-pi
+ Plugin for lxpanel-pi to safely eject USB devices before removal.
 
 Package: wfplug-ejecter
 Architecture: any

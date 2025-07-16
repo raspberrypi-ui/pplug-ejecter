@@ -245,7 +245,11 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
     DEBUG ("DRIVE REMOVED %s", g_drive_get_name (drive));
 
     if (was_mounted (ej, drive) && !was_ejected (ej, drive))
-        wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
+    {
+        // filter Pico loader
+        if (strncmp (g_drive_get_name (drive), "RPI RP2", 7))
+            wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
+    }
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);

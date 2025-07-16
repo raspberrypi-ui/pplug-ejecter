@@ -1,3 +1,9 @@
+pplug-ejecter (1.1) trixie; urgency=medium
+
+  * Hide messages from Pico
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 15 Jul 2025 15:24:40 +0100
+
 pplug-ejecter (1.0) trixie; urgency=medium
 
   * Modify for lxpanel-pi

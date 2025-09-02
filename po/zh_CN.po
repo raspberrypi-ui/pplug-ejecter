@@ -1,0 +1,62 @@
+# English translations for wf-panel-pi package.
+# Copyright (C) 2024 Raspberry Pi Ltd
+# This file is distributed under the same license as the wf-panel-pi package.
+# Simon Long <simon@raspberrypi.com>, 2024.
+# ykla <yklaxds@gmail.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-20 07:49+0000\n"
+"PO-Revision-Date: 2025-08-23 14:41+0800\n"
+"Last-Translator: ykla <yklaxds@gmail.com>\n"
+"Language-Team: ykla <yklaxds@gmail.com>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.7\n"
+
+#: ../src/ejecter.c:228
+msgid ""
+"Drive was removed without ejecting\n"
+"Please use menu to eject before removal"
+msgstr ""
+"驱动器未安全卸载即被移除\n"
+"请通过菜单进行安全卸载。"
+
+#: ../src/ejecter.c:256
+#, c-format
+msgid ""
+"%s has been ejected\n"
+"It is now safe to remove the device"
+msgstr ""
+"已卸载 %s。\n"
+"现在可以安全地移除设备。"
+
+#: ../src/ejecter.c:262
+#, c-format
+msgid ""
+"Failed to eject %s\n"
+"%s"
+msgstr ""
+"%s 卸载失败\n"
+"%s"
+
+#: ../src/ejecter.c:440
+msgid "Select a drive in menu to eject safely"
+msgstr "在菜单中选择驱动器可安全卸载"
+
+#: ../src/ejecter.c:559 ../src/ejecter.c:569 ../src/ejecter.cpp:40
+msgid "Ejecter"
+msgstr "卸载设备"
+
+#: ../src/ejecter.c:561 ../src/ejecter.cpp:36
+msgid "Hide icon when no devices"
+msgstr "无设备时隐藏图标"
+
+#: ../src/ejecter.c:570
+msgid "Ejects mounted drives"
+msgstr "卸载已挂载的设备"

@@ -142,6 +142,7 @@ static void log_mount (EjecterPlugin *ej, GMount *mount)
 
     ej->mdrives = g_list_append (ej->mdrives, drive);
     DEBUG ("MOUNTED DRIVE %s", g_drive_get_name (drive));
+    g_object_unref (drive);
 }
 
 static void log_init_mounts (EjecterPlugin *ej)
@@ -149,11 +150,8 @@ static void log_init_mounts (EjecterPlugin *ej)
     ej->mdrives = NULL;
     GList *l, *mnts = g_volume_monitor_get_mounts (ej->monitor);
     for (l = mnts; l != NULL; l = l->next)
-    {
         log_mount (ej, (GMount *) l->data);
-        g_object_unref (l->data);
-    }
-    g_list_free (mnts);
+    g_list_free_full (mnts, g_object_unref);
 }
 
 static gboolean was_mounted (EjecterPlugin *ej, GDrive *drive)
@@ -248,8 +246,10 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
     if (was_mounted (ej, drive) && !was_ejected (ej, drive))
     {
         // filter Pico loader
-        if (strncmp (g_drive_get_name (drive), "RPI RP2", 7))
+        char *name = g_drive_get_name (drive);
+        if (strncmp (name, "RPI RP2", 7))
             wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
+        g_free (name);
     }
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
@@ -289,9 +289,7 @@ static void handle_eject_clicked (GtkWidget *, gpointer data)
             }
             if (mnt) g_object_unref (mnt);
         }
-        for (iter = vols; iter != NULL; iter = g_list_next (iter))
-            g_object_unref (iter->data);
-        g_list_free (vols);
+        g_list_free_full (vols, g_object_unref);
     }
     g_free (id);
 }
@@ -300,9 +298,10 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
 {
     EjecterPlugin *ej = (EjecterPlugin *) data;
     GDrive *drv = (GDrive *) source_object;
-    char *buffer, *name = g_drive_get_name (drv)
+    char *buffer, *name;
     GError *err = NULL;
 
+    name = g_drive_get_name (drv);
     g_drive_eject_with_operation_finish (drv, res, &err);
 
     if (err == NULL)
@@ -355,12 +354,19 @@ static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer da
 static gboolean is_drive_mounted (GDrive *d)
 {
     GList *viter, *vols = g_drive_get_volumes (d);
+    gboolean res = FALSE;
 
     for (viter = vols; viter != NULL; viter = g_list_next (viter))
     {
-        if (g_volume_get_mount ((GVolume *) viter->data) != NULL) return TRUE;
+        GMount *mnt = g_volume_get_mount ((GVolume *) viter->data);
+        if (mnt != NULL)
+        {
+            res = TRUE;
+            g_object_unref (mnt);
+        }
     }
-    return FALSE;
+    g_list_free_full (vols, g_object_unref);
+    return res;
 }
 
 static void update_icon (EjecterPlugin *ej)
@@ -370,6 +376,8 @@ static void update_icon (EjecterPlugin *ej)
         /* loop through all devices, checking for mounted volumes */
         GList *driter, *drives = g_volume_monitor_get_connected_drives (ej->monitor);
 
+        gtk_widget_hide (ej->plugin);
+        gtk_widget_set_sensitive (ej->plugin, FALSE);
         for (driter = drives; driter != NULL; driter = g_list_next (driter))
         {
             GDrive *drv = (GDrive *) driter->data;
@@ -377,11 +385,9 @@ static void update_icon (EjecterPlugin *ej)
             {
                 gtk_widget_show_all (ej->plugin);
                 gtk_widget_set_sensitive (ej->plugin, TRUE);
-                return;
             }
         }
-        gtk_widget_hide (ej->plugin);
-        gtk_widget_set_sensitive (ej->plugin, FALSE);
+        g_list_free_full (drives, g_object_unref);
     }
     else
     {
@@ -415,6 +421,7 @@ static void show_menu (EjecterPlugin *ej)
             count++;
         }
     }
+    g_list_free_full (drives, g_object_unref);
 
     if (count)
     {
@@ -435,28 +442,34 @@ static void hide_menu (EjecterPlugin *ej)
 
 static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
 {
-    char buffer[1024];
-    GList *vols;
+    char buffer[1024], *name, *vname;
+    GList *vols, *iter;
     GVolume *v;
     GIcon *ic;
     GtkWidget *item, *icon, *eject;
 
     vols = g_drive_get_volumes (d);
+    name = g_drive_get_name (d);
 
-    sprintf (buffer, "%s (", g_drive_get_name (d));
-    GList *iter;
+    sprintf (buffer, "%s (", name);
     gboolean first = TRUE;
     for (iter = vols; iter != NULL; iter = g_list_next (iter))
     {
         v = (GVolume *) iter->data;
-        if (g_volume_get_name (v))
+        vname = g_volume_get_name (v);
+        if (vname)
         {
             if (first) first = FALSE;
             else strcat (buffer, ", ");
-            strcat (buffer, g_volume_get_name (v));
+            strcat (buffer, vname);
+            g_free (vname);
         }
     }
+    g_list_free_full (vols, g_object_unref);
+
     strcat (buffer, ")");
+    g_free (name);
+
     ic = g_drive_get_icon (d);
     icon = gtk_image_new_from_gicon (ic, wrap_icon_size (ej) >= 32 ? GTK_ICON_SIZE_LARGE_TOOLBAR : GTK_ICON_SIZE_BUTTON);
     g_object_unref (ic);

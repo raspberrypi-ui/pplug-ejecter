@@ -87,6 +87,7 @@ static void handle_drive_in (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_eject_clicked (GtkWidget *widget, gpointer ptr);
 static void eject_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
+static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
 static gboolean is_drive_mounted (GDrive *d);
 static void update_icon (EjecterPlugin *ej);
 static void show_menu (EjecterPlugin *ej);
@@ -260,16 +261,46 @@ static void handle_eject_clicked (GtkWidget *, gpointer data)
     CallbackData *dt = (CallbackData *) data;
     EjecterPlugin *ej = dt->ej;
     GDrive *drv = dt->drv;
+    char *id = g_drive_get_identifier (drv, G_DRIVE_IDENTIFIER_KIND_UNIX_DEVICE);
     DEBUG ("EJECT %s", g_drive_get_name (drv));
 
-    g_drive_eject_with_operation (drv, G_MOUNT_UNMOUNT_NONE, NULL, NULL, eject_done, ej);
+    // this should probably be replaced with a proper less hacky test at some point...
+    if (!strstr (id, "mmcblk0"))
+        g_drive_eject_with_operation (drv, G_MOUNT_UNMOUNT_NONE, NULL, NULL, eject_done, ej);
+    else
+    {
+        DEBUG ("EJECTING VOLUMES");
+
+        GList *vols, *iter;
+        GVolume *v;
+        vols = g_drive_get_volumes (drv);
+        for (iter = vols; iter != NULL; iter = g_list_next (iter))
+        {
+            v = (GVolume *) iter->data;
+            GMount *mnt = g_volume_get_mount (v);
+            if (mnt && g_mount_can_eject (mnt))
+            {
+                CallbackData *dtn = g_new0 (CallbackData, 1);
+                dtn->ej = ej;
+                dtn->drv = drv;
+                g_mount_eject_with_operation (mnt, G_MOUNT_UNMOUNT_NONE, NULL, NULL, unmount_done, dtn);
+                g_object_unref (mnt);
+                break;
+            }
+            if (mnt) g_object_unref (mnt);
+        }
+        for (iter = vols; iter != NULL; iter = g_list_next (iter))
+            g_object_unref (iter->data);
+        g_list_free (vols);
+    }
+    g_free (id);
 }
 
 static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data)
 {
     EjecterPlugin *ej = (EjecterPlugin *) data;
     GDrive *drv = (GDrive *) source_object;
-    char *buffer;
+    char *buffer, *name = g_drive_get_name (drv)
     GError *err = NULL;
 
     g_drive_eject_with_operation_finish (drv, res, &err);
@@ -277,18 +308,47 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     if (err == NULL)
     {
         DEBUG ("EJECT COMPLETE");
-        buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), g_drive_get_name (drv));
+        buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
     else
     {
         DEBUG ("EJECT FAILED");
-        buffer = g_strdup_printf (_("Failed to eject %s\n%s"), g_drive_get_name (drv), err->message);
+        buffer = g_strdup_printf (_("Failed to eject %s\n%s"), name, err->message);
         wrap_notify (ej->panel, buffer);
     }
+    g_free (name);
     g_free (buffer);
 }
 
+static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer data)
+{
+    CallbackData *dt = (CallbackData *) data;
+    EjecterPlugin *ej = dt->ej;
+    GMount *mnt = (GMount *) source_object;
+    GDrive *drv = dt->drv;
+    char *buffer, *name = g_drive_get_name (drv);
+    GError *err = NULL;
+
+    g_mount_eject_with_operation_finish (mnt, res, &err);
+
+    if (err == NULL)
+    {
+        DEBUG ("VOL EJECT COMPLETE");
+        buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
+        wrap_notify (ej->panel, buffer);
+        add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
+    }
+    else
+    {
+        DEBUG ("VOL EJECT FAILED");
+        buffer = g_strdup_printf (_("Failed to eject %s\n%s"), name, err->message);
+        wrap_notify (ej->panel, buffer);
+    }
+    g_free (name);
+    g_free (buffer);
+    g_free (dt);
+}
 
 /* Ejecter functions */
 

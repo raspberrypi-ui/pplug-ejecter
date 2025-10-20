@@ -445,7 +445,7 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
     char buffer[1024], *name, *vname;
     GList *vols, *iter;
     GVolume *v;
-    GIcon *ic;
+    GIcon *ic = NULL;
     GtkWidget *item, *icon, *eject;
 
     vols = g_drive_get_volumes (d);
@@ -459,7 +459,11 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
         vname = g_volume_get_name (v);
         if (vname)
         {
-            if (first) first = FALSE;
+            if (first)
+            {
+                ic = g_volume_get_icon (v);
+                first = FALSE;
+            }
             else strcat (buffer, ", ");
             strcat (buffer, vname);
             g_free (vname);
@@ -470,7 +474,7 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
     strcat (buffer, ")");
     g_free (name);
 
-    ic = g_drive_get_icon (d);
+    if (!ic) ic = g_drive_get_icon (d);
     icon = gtk_image_new_from_gicon (ic, wrap_icon_size (ej) >= 32 ? GTK_ICON_SIZE_LARGE_TOOLBAR : GTK_ICON_SIZE_BUTTON);
     g_object_unref (ic);
 

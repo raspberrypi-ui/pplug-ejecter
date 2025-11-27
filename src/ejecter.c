@@ -87,7 +87,8 @@ static void handle_drive_in (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_eject_clicked (GtkWidget *widget, gpointer ptr);
 static void eject_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
-static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
+static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
+static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
 static gboolean is_drive_mounted (GDrive *d);
 static void update_icon (EjecterPlugin *ej);
 static void show_menu (EjecterPlugin *ej);
@@ -265,8 +266,11 @@ static void handle_eject_clicked (GtkWidget *, gpointer data)
     DEBUG ("EJECT %s", g_drive_get_name (drv));
 
     // this should probably be replaced with a proper less hacky test at some point...
-    if (!strstr (id, "mmcblk0"))
+    if (g_drive_is_media_removable (drv) && !strstr (id, "mmcblk0"))
+    {
+        DEBUG ("EJECTING DRIVE");
         g_drive_eject_with_operation (drv, G_MOUNT_UNMOUNT_NONE, NULL, NULL, eject_done, ej);
+    }
     else
     {
         DEBUG ("EJECTING VOLUMES");
@@ -278,12 +282,25 @@ static void handle_eject_clicked (GtkWidget *, gpointer data)
         {
             v = (GVolume *) iter->data;
             GMount *mnt = g_volume_get_mount (v);
-            if (mnt && g_mount_can_eject (mnt))
+            if (mnt)
             {
                 CallbackData *dtn = g_new0 (CallbackData, 1);
                 dtn->ej = ej;
                 dtn->drv = drv;
-                g_mount_eject_with_operation (mnt, G_MOUNT_UNMOUNT_NONE, NULL, NULL, unmount_done, dtn);
+                if (g_mount_can_eject (mnt))
+                {
+                    DEBUG ("EJECTING VOLUME");
+                    g_mount_eject_with_operation (mnt, G_MOUNT_UNMOUNT_NONE, NULL, NULL, vol_eject_done, dtn);
+                }
+                else if (g_mount_can_unmount (mnt))
+                {
+                    DEBUG ("UNMOUNTING VOLUME");
+                    g_mount_unmount_with_operation (mnt, G_MOUNT_UNMOUNT_NONE, NULL, NULL, vol_unmount_done, dtn);
+                }
+                else
+                {
+                    DEBUG ("CANNOT EJECT OR UNMOUNT");
+                }
                 g_object_unref (mnt);
                 break;
             }
@@ -320,7 +337,7 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     g_free (buffer);
 }
 
-static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer data)
+static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer data)
 {
     CallbackData *dt = (CallbackData *) data;
     EjecterPlugin *ej = dt->ej;
@@ -341,6 +358,35 @@ static void unmount_done (GObject *source_object, GAsyncResult *res, gpointer da
     else
     {
         DEBUG ("VOL EJECT FAILED");
+        buffer = g_strdup_printf (_("Failed to eject %s\n%s"), name, err->message);
+        wrap_notify (ej->panel, buffer);
+    }
+    g_free (name);
+    g_free (buffer);
+    g_free (dt);
+}
+
+static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointer data)
+{
+    CallbackData *dt = (CallbackData *) data;
+    EjecterPlugin *ej = dt->ej;
+    GMount *mnt = (GMount *) source_object;
+    GDrive *drv = dt->drv;
+    char *buffer, *name = g_drive_get_name (drv);
+    GError *err = NULL;
+
+    g_mount_unmount_with_operation_finish (mnt, res, &err);
+
+    if (err == NULL)
+    {
+        DEBUG ("VOL UNMOUNT COMPLETE");
+        buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
+        wrap_notify (ej->panel, buffer);
+        add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
+    }
+    else
+    {
+        DEBUG ("VOL UNMOUNT FAILED");
         buffer = g_strdup_printf (_("Failed to eject %s\n%s"), name, err->message);
         wrap_notify (ej->panel, buffer);
     }
@@ -434,10 +480,10 @@ static void hide_menu (EjecterPlugin *ej)
 {
     if (ej->menu)
     {
-		gtk_menu_popdown (GTK_MENU (ej->menu));
-		gtk_widget_destroy (ej->menu);
-		ej->menu = NULL;
-	}
+        gtk_menu_popdown (GTK_MENU (ej->menu));
+        gtk_widget_destroy (ej->menu);
+        ej->menu = NULL;
+    }
 }
 
 static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)

@@ -1,3 +1,9 @@
+pplug-ejecter (1.6) trixie; urgency=medium
+
+  * Try to stop a drive if it cannot be ejected
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 28 Nov 2025 21:01:46 +0000
+
 pplug-ejecter (1.5) trixie; urgency=medium
 
   * Handle NVMe drives in USB enclosures

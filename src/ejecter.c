@@ -87,6 +87,7 @@ static void handle_drive_in (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data);
 static void handle_eject_clicked (GtkWidget *widget, gpointer ptr);
 static void eject_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
+static void stop_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
 static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
 static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer ptr);
 static gboolean is_drive_mounted (GDrive *d);
@@ -271,6 +272,11 @@ static void handle_eject_clicked (GtkWidget *, gpointer data)
         DEBUG ("EJECTING DRIVE");
         g_drive_eject_with_operation (drv, G_MOUNT_UNMOUNT_NONE, NULL, NULL, eject_done, ej);
     }
+    else if (g_drive_can_stop (drv))
+    {
+        DEBUG ("STOPPING DRIVE");
+        g_drive_stop (drv, G_MOUNT_UNMOUNT_NONE, NULL, NULL, stop_done, ej);
+    }
     else
     {
         DEBUG ("EJECTING VOLUMES");
@@ -337,6 +343,31 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     g_free (buffer);
 }
 
+static void stop_done (GObject *source_object, GAsyncResult *res, gpointer data)
+{
+    EjecterPlugin *ej = (EjecterPlugin *) data;
+    GDrive *drv = (GDrive *) source_object;
+    char *buffer, *name;
+    GError *err = NULL;
+
+    name = g_drive_get_name (drv);
+    g_drive_stop_finish (drv, res, &err);
+
+    if (err == NULL)
+    {
+        DEBUG ("STOP COMPLETE");
+        buffer = g_strdup_printf (_("%s has been stopped\nIt is now safe to remove the device"), name);
+    }
+    else
+    {
+        DEBUG ("STOP FAILED");
+        buffer = g_strdup_printf (_("Failed to stop %s\n%s"), name, err->message);
+    }
+    wrap_notify (ej->panel, buffer);
+    g_free (name);
+    g_free (buffer);
+}
+
 static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer data)
 {
     CallbackData *dt = (CallbackData *) data;
@@ -380,14 +411,14 @@ static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointe
     if (err == NULL)
     {
         DEBUG ("VOL UNMOUNT COMPLETE");
-        buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
+        buffer = g_strdup_printf (_("%s has been unmounted\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
     else
     {
         DEBUG ("VOL UNMOUNT FAILED");
-        buffer = g_strdup_printf (_("Failed to eject %s\n%s"), name, err->message);
+        buffer = g_strdup_printf (_("Failed to unmount %s\n%s"), name, err->message);
         wrap_notify (ej->panel, buffer);
     }
     g_free (name);

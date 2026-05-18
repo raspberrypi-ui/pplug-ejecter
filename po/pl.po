@@ -1,0 +1,97 @@
+# Polish translations for plugin package
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the wf-panel-pi package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-18 11:25+0200\n"
+"PO-Revision-Date: 2026-04-18 12:06+0200\n"
+"Last-Translator: Skotniczny <skotniczny@outlook.com>\n"
+"Language-Team: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+
+#: ../src/ejecter.c:67
+msgid "Hide icon when no devices"
+msgstr "Ukryj ikonę, gdy nie ma żadnych urządzeń"
+
+#: ../src/ejecter.c:253
+msgid ""
+"Drive was removed without ejecting\n"
+"Please use menu to eject before removal"
+msgstr ""
+"Urządzenie zostało usunięte bez wysunięcia\n"
+"Użyj menu, aby wysunąć urządzenie przed usunięciem"
+
+#: ../src/ejecter.c:333 ../src/ejecter.c:385
+#, c-format
+msgid ""
+"%s has been ejected\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s został wysunięty\n"
+"Można teraz bezpiecznie usunąć urządzenie"
+
+#: ../src/ejecter.c:339 ../src/ejecter.c:392
+#, c-format
+msgid ""
+"Failed to eject %s\n"
+"%s"
+msgstr ""
+"Nie udało się wysunąć %s\n"
+"%s"
+
+#: ../src/ejecter.c:359
+#, c-format
+msgid ""
+"%s has been stopped\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s został zatrzymany\n"
+"Można teraz bezpiecznie usunąć urządzenie"
+
+#: ../src/ejecter.c:364
+#, c-format
+msgid ""
+"Failed to stop %s\n"
+"%s"
+msgstr ""
+"Nie udało się zatrzymać %s\n"
+"%s"
+
+#: ../src/ejecter.c:414
+#, c-format
+msgid ""
+"%s has been unmounted\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s został odmontowany\n"
+"Można teraz bezpiecznie usunąć urządzenie"
+
+#: ../src/ejecter.c:421
+#, c-format
+msgid ""
+"Failed to unmount %s\n"
+"%s"
+msgstr ""
+"Nie udało się odmontować %s\n"
+"%s"
+
+#: ../src/ejecter.c:621
+msgid "Select a drive in menu to eject safely"
+msgstr "Wybierz napęd z menu, aby bezpiecznie go wysunąć"
+
+#: ../src/ejecter.c:734
+msgid "Ejects mounted drives"
+msgstr "Wysuwa zamontowane napędy"
+
+#. End of file
+#. ----------------------------------------------------------------------------
+msgid "Ejecter"
+msgstr "Wysuwanie"

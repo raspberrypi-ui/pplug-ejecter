@@ -166,7 +166,6 @@ static gboolean was_mounted (EjecterPlugin *ej, GDrive *drive)
         if (drv == drive)
         {
             ej->mdrives = g_list_remove (ej->mdrives, drv);
-            g_object_unref (drv);
             return TRUE;
         }
     }

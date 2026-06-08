@@ -217,6 +217,12 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     EjecterPlugin *ej = (EjecterPlugin *) data;
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
+    // if pcmanfm is not running, need to manually automount
+    if (system ("pgrep -x pcmanfm > /dev/null"))
+    {
+        if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, NULL, NULL);
+    }
+
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);
 }

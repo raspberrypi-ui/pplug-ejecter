@@ -212,6 +212,22 @@ static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data)
     log_eject (ej, g_mount_get_drive (mount));
 }
 
+static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
+{
+    if (g_volume_mount_finish (vol, res, NULL))
+    {
+        GMount *mnt = g_volume_get_mount (vol);
+        GFile *root = g_mount_get_root (mnt);
+        char *path = g_file_get_path (root);
+        char *cmd = g_strdup_printf ("pcmanfm %s &", path);
+        system (cmd);
+        g_free (cmd);
+        g_free (path);
+        g_object_unref (root);
+        g_object_unref (mnt);
+    }
+}
+
 static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
 {
     EjecterPlugin *ej = (EjecterPlugin *) data;
@@ -220,7 +236,7 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     // if pcmanfm is not running, need to manually automount
     if (system ("pgrep -x pcmanfm > /dev/null"))
     {
-        if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, NULL, NULL);
+        if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
     }
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);

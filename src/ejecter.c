@@ -216,17 +216,32 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
 {
     if (g_volume_mount_finish (vol, res, NULL))
     {
+#ifndef LXPLUG
         GMount *mnt = g_volume_get_mount (vol);
         GFile *root = g_mount_get_root (mnt);
         char *path = g_file_get_path (root);
-        char *cmd = g_strdup_printf ("pcmanfm %s &", path);
-        system (cmd);
-        g_free (cmd);
+
+        GNotification *not = g_notification_new (_("Removable drive connected"));
+        g_notification_add_button_with_target (not, _("Open"), "app.open-mount", "s", path);
+        g_application_send_notification (g_application_get_default (), NULL, not);
+        g_object_unref (not);
+
         g_free (path);
         g_object_unref (root);
         g_object_unref (mnt);
+#endif
     }
 }
+
+#ifndef LXPLUG
+static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
+{
+    char *cmd = g_strdup_printf ("pcmanfm %s &", g_variant_get_string (param, NULL));
+    system (cmd);
+    g_free (cmd);
+    return FALSE;
+}
+#endif
 
 static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
 {
@@ -661,6 +676,12 @@ void ejecter_init (EjecterPlugin *ej)
     g_signal_connect (ej->monitor, "mount-pre-unmount", G_CALLBACK (handle_mount_pre), ej);
     g_signal_connect (ej->monitor, "drive-connected", G_CALLBACK (handle_drive_in), ej);
     g_signal_connect (ej->monitor, "drive-disconnected", G_CALLBACK (handle_drive_out), ej);
+
+#ifndef LXPLUG
+    GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
+    g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
+    g_action_map_add_action (G_ACTION_MAP (g_application_get_default ()), G_ACTION (act));
+#endif
 
     log_init_mounts (ej);
 }

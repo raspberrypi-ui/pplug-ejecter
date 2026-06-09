@@ -212,11 +212,11 @@ static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data)
     log_eject (ej, g_mount_get_drive (mount));
 }
 
+#ifndef LXPLUG
 static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
 {
     if (g_volume_mount_finish (vol, res, NULL))
     {
-#ifndef LXPLUG
         GMount *mnt = g_volume_get_mount (vol);
         GFile *root = g_mount_get_root (mnt);
         char *path = g_file_get_path (root);
@@ -229,11 +229,9 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
         g_free (path);
         g_object_unref (root);
         g_object_unref (mnt);
-#endif
     }
 }
 
-#ifndef LXPLUG
 static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
 {
     char *cmd = g_strdup_printf ("pcmanfm %s &", g_variant_get_string (param, NULL));
@@ -248,11 +246,9 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     EjecterPlugin *ej = (EjecterPlugin *) data;
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
-    // if pcmanfm is not running, need to manually automount
-    if (system ("pgrep -x pcmanfm > /dev/null"))
-    {
-        if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
-    }
+#ifndef LXPLUG
+    if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
+#endif
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);

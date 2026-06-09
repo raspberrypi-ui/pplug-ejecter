@@ -247,7 +247,8 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
 #ifndef LXPLUG
-    if (!g_volume_get_mount (vol)) g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
+    if (g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
+        g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
 #endif
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
@@ -677,6 +678,18 @@ void ejecter_init (EjecterPlugin *ej)
     GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
     g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
     g_action_map_add_action (G_ACTION_MAP (g_application_get_default ()), G_ACTION (act));
+
+    /* try to automount all volumes */
+    GList *vols, *l;
+    vols = g_volume_monitor_get_volumes (ej->monitor);
+    for (l = vols; l; l = l->next)
+    {
+        GVolume* vol = G_VOLUME (l->data);
+        if (g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
+            g_volume_mount (vol, 0, NULL, NULL, NULL, NULL);
+        g_object_unref (vol);
+    }
+    g_list_free (vols);
 #endif
 
     log_init_mounts (ej);

@@ -52,6 +52,7 @@ bool WayfireEjecter::set_icon (void)
 void WayfireEjecter::read_settings (void)
 {
     ej->autohide = autohide;
+    ej->automount = automount;
 }
 
 void WayfireEjecter::settings_changed_cb (void)
@@ -81,6 +82,7 @@ void WayfireEjecter::init (Gtk::HBox *container)
 
     /* Setup callbacks */
     autohide.set_callback (sigc::mem_fun (*this, &WayfireEjecter::settings_changed_cb));
+    automount.set_callback (sigc::mem_fun (*this, &WayfireEjecter::settings_changed_cb));
 }
 
 WayfireEjecter::~WayfireEjecter()

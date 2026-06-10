@@ -63,9 +63,10 @@ typedef struct {
 /* Global data                                                                */
 /*----------------------------------------------------------------------------*/
 
-conf_table_t conf_table[2] = {
-    {CONF_TYPE_BOOL, "autohide", N_("Hide icon when no devices"),   NULL},
-    {CONF_TYPE_NONE,  NULL,      NULL,                              NULL}
+conf_table_t conf_table[3] = {
+    {CONF_TYPE_BOOL, "autohide",    N_("Hide icon when no devices"),    NULL},
+    {CONF_TYPE_BOOL, "automount",   N_("Automount removable devices"),  NULL},
+    {CONF_TYPE_NONE,  NULL,         NULL,                               NULL}
 };
 
 /*----------------------------------------------------------------------------*/
@@ -212,11 +213,11 @@ static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data)
     log_eject (ej, g_mount_get_drive (mount));
 }
 
-#ifndef LXPLUG
 static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
 {
     if (g_volume_mount_finish (vol, res, NULL))
     {
+#ifndef LXPLUG
         GMount *mnt = g_volume_get_mount (vol);
         GFile *root = g_mount_get_root (mnt);
         char *path = g_file_get_path (root);
@@ -229,9 +230,11 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
         g_free (path);
         g_object_unref (root);
         g_object_unref (mnt);
+#endif
     }
 }
 
+#ifndef LXPLUG
 static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
 {
     char *cmd = g_strdup_printf ("pcmanfm %s &", g_variant_get_string (param, NULL));
@@ -246,10 +249,8 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     EjecterPlugin *ej = (EjecterPlugin *) data;
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
-#ifndef LXPLUG
-    if (g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
+    if (ej->automount && g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
         g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
-#endif
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);
@@ -674,25 +675,25 @@ void ejecter_init (EjecterPlugin *ej)
     g_signal_connect (ej->monitor, "drive-connected", G_CALLBACK (handle_drive_in), ej);
     g_signal_connect (ej->monitor, "drive-disconnected", G_CALLBACK (handle_drive_out), ej);
 
-#ifndef LXPLUG
-    GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
-    g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
-    g_action_map_add_action (G_ACTION_MAP (g_application_get_default ()), G_ACTION (act));
-
     /* try to automount all volumes */
     GList *vols, *l;
     vols = g_volume_monitor_get_volumes (ej->monitor);
     for (l = vols; l; l = l->next)
     {
         GVolume* vol = G_VOLUME (l->data);
-        if (g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
+        if (ej->automount && g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
             g_volume_mount (vol, 0, NULL, NULL, NULL, NULL);
         g_object_unref (vol);
     }
     g_list_free (vols);
-#endif
 
     log_init_mounts (ej);
+
+#ifndef LXPLUG
+    GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
+    g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
+    g_action_map_add_action (G_ACTION_MAP (g_application_get_default ()), G_ACTION (act));
+#endif
 }
 
 void ejecter_destructor (gpointer user_data)
@@ -721,9 +722,11 @@ static GtkWidget *ejecter_constructor (LXPanel *panel, config_setting_t *setting
 
     /* Set config defaults */
     ej->autohide = TRUE;
+    ej->automount = TRUE;
 
     /* Read config */
     conf_table[0].value = (void *) &ej->autohide;
+    conf_table[1].value = (void *) &ej->automount;
     lxplug_read_settings (ej->settings, conf_table);
 
     ejecter_init (ej);

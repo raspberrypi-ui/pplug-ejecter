@@ -8,6 +8,10 @@
 		<_short>Ejecter Hide When Nothing To Eject</_short>
 		<default>true</default>
 	</option>
+	<option name="ejecter_automount" type="bool">
+		<_short>Ejecter Automount Removable Drives</_short>
+		<default>true</default>
+	</option>
 	</group>
 	</plugin>
 </wf-panel-pi>

@@ -48,12 +48,13 @@ typedef struct
     GtkWidget *empty;               /* Menuitem shown when no devices */
     GVolumeMonitor *monitor;
     gboolean autohide;
+    gboolean automount;
     GList *ejdrives;
     GList *mdrives;
     guint hide_timer;
 } EjecterPlugin;
 
-extern conf_table_t conf_table[2];
+extern conf_table_t conf_table[3];
 
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */

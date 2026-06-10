@@ -21,6 +21,18 @@ msgstr ""
 msgid "Hide icon when no devices"
 msgstr "Hide Icon when No Devices"
 
+#: ../src/ejecter.c:68
+msgid "Automount removable devices"
+msgstr "Automount Removable Devices"
+
+#: ../src/ejecter.c:225
+msgid "Removable drive connected"
+msgstr "Removable drive connected"
+
+#: ../src/ejecter.c:226
+msgid "Open"
+msgstr "Open"
+
 #: ../src/ejecter.c:248
 msgid ""
 "Drive was removed without ejecting\n"

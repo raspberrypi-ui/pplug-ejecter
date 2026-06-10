@@ -45,6 +45,7 @@ class WayfireEjecter : public WayfireWidget
     sigc::connection icon_timer;
 
     WfOption <bool> autohide {"panel/ejecter_autohide"};
+    WfOption <bool> automount {"panel/ejecter_automount"};
 
     /* plugin */
     EjecterPlugin *ej;

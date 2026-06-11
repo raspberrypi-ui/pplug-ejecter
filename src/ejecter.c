@@ -290,7 +290,12 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
         // filter Pico loader
         char *name = g_drive_get_name (drive);
         if (strncmp (name, "RPI RP2", 7))
+        {
+#ifndef LXPLUG
+            g_application_withdraw_notification (g_application_get_default (), name);
+#endif
             wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
+        }
         g_free (name);
     }
 

@@ -218,9 +218,9 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
     if (g_volume_mount_finish (vol, res, NULL))
     {
 #ifndef LXPLUG
+        GDrive *drv = g_volume_get_drive (vol);
         GMount *mnt = g_volume_get_mount (vol);
         GFile *root = g_mount_get_root (mnt);
-        GDrive *drv = g_volume_get_drive (vol);
         char *name = g_drive_get_name (drv);
         char *msg = g_strdup_printf (_("Removable drive %s connected"), name);
         char *path = g_file_get_path (root);
@@ -233,9 +233,9 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
         g_free (path);
         g_free (msg);
         g_free (name);
-        g_object_unref (drv);
         g_object_unref (root);
         g_object_unref (mnt);
+        g_object_unref (drv);
 #endif
     }
 }

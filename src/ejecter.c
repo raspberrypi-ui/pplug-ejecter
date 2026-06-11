@@ -220,14 +220,20 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
 #ifndef LXPLUG
         GMount *mnt = g_volume_get_mount (vol);
         GFile *root = g_mount_get_root (mnt);
+        GDrive *drv = g_volume_get_drive (vol);
+        char *name = g_drive_get_name (drv);
+        char *msg = g_strdup_printf (_("Removable drive %s connected"), name);
         char *path = g_file_get_path (root);
 
-        GNotification *not = g_notification_new (_("Removable drive connected"));
+        GNotification *not = g_notification_new (msg);
         g_notification_add_button_with_target (not, _("Open"), "app.open-mount", "s", path);
-        g_application_send_notification (g_application_get_default (), NULL, not);
+        g_application_send_notification (g_application_get_default (), name, not);
         g_object_unref (not);
 
         g_free (path);
+        g_free (msg);
+        g_free (name);
+        g_object_unref (drv);
         g_object_unref (root);
         g_object_unref (mnt);
 #endif
@@ -364,6 +370,9 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     if (err == NULL)
     {
         DEBUG ("EJECT COMPLETE");
+#ifndef LXPLUG
+        g_application_withdraw_notification (g_application_get_default (), name);
+#endif
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
@@ -390,6 +399,9 @@ static void stop_done (GObject *source_object, GAsyncResult *res, gpointer data)
     if (err == NULL)
     {
         DEBUG ("STOP COMPLETE");
+#ifndef LXPLUG
+        g_application_withdraw_notification (g_application_get_default (), name);
+#endif
         buffer = g_strdup_printf (_("%s has been stopped\nIt is now safe to remove the device"), name);
     }
     else
@@ -416,6 +428,9 @@ static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer 
     if (err == NULL)
     {
         DEBUG ("VOL EJECT COMPLETE");
+#ifndef LXPLUG
+        g_application_withdraw_notification (g_application_get_default (), name);
+#endif
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
@@ -445,6 +460,9 @@ static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointe
     if (err == NULL)
     {
         DEBUG ("VOL UNMOUNT COMPLETE");
+#ifndef LXPLUG
+        g_application_withdraw_notification (g_application_get_default (), name);
+#endif
         buffer = g_strdup_printf (_("%s has been unmounted\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));

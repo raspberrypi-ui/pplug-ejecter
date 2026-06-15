@@ -690,13 +690,13 @@ void ejecter_init (EjecterPlugin *ej)
 
     /* Get volume monitor and connect to events */
     ej->monitor = g_volume_monitor_get ();
-    g_signal_connect (ej->monitor, "volume-added", G_CALLBACK (handle_volume_in), ej);
-    g_signal_connect (ej->monitor, "volume-removed", G_CALLBACK (handle_volume_out), ej);
-    g_signal_connect (ej->monitor, "mount-added", G_CALLBACK (handle_mount_in), ej);
-    g_signal_connect (ej->monitor, "mount-removed", G_CALLBACK (handle_mount_out), ej);
-    g_signal_connect (ej->monitor, "mount-pre-unmount", G_CALLBACK (handle_mount_pre), ej);
-    g_signal_connect (ej->monitor, "drive-connected", G_CALLBACK (handle_drive_in), ej);
-    g_signal_connect (ej->monitor, "drive-disconnected", G_CALLBACK (handle_drive_out), ej);
+    ej->handlers[0] = g_signal_connect (ej->monitor, "volume-added", G_CALLBACK (handle_volume_in), ej);
+    ej->handlers[1] = g_signal_connect (ej->monitor, "volume-removed", G_CALLBACK (handle_volume_out), ej);
+    ej->handlers[2] = g_signal_connect (ej->monitor, "mount-added", G_CALLBACK (handle_mount_in), ej);
+    ej->handlers[3] = g_signal_connect (ej->monitor, "mount-removed", G_CALLBACK (handle_mount_out), ej);
+    ej->handlers[4] = g_signal_connect (ej->monitor, "mount-pre-unmount", G_CALLBACK (handle_mount_pre), ej);
+    ej->handlers[5] = g_signal_connect (ej->monitor, "drive-connected", G_CALLBACK (handle_drive_in), ej);
+    ej->handlers[6] = g_signal_connect (ej->monitor, "drive-disconnected", G_CALLBACK (handle_drive_out), ej);
 
     /* try to automount all volumes */
     GList *vols, *l;
@@ -722,6 +722,10 @@ void ejecter_init (EjecterPlugin *ej)
 void ejecter_destructor (gpointer user_data)
 {
     EjecterPlugin *ej = (EjecterPlugin *) user_data;
+    int i;
+
+    for (i = 0; i < 7; i++) g_signal_handler_disconnect (ej->monitor, ej->handlers[i]);
+    g_object_unref (ej->monitor);
 
     g_free (ej);
 }

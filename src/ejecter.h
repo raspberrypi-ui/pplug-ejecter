@@ -52,6 +52,7 @@ typedef struct
     GList *ejdrives;
     GList *mdrives;
     guint hide_timer;
+    gulong handlers[7];
 } EjecterPlugin;
 
 extern conf_table_t conf_table[3];

@@ -1,17 +1,13 @@
 <?xml version="1.0"?>
 <wf-panel-pi>
-	<plugin name="panel">
-	<_short>Panel</_short>
+  <plugin name="ejecter">
 	<group>
-	<_short>Ejecter</_short>
-	<option name="ejecter_autohide" type="bool">
-		<_short>Ejecter Hide When Nothing To Eject</_short>
+	  <option name="autohide" type="bool">
 		<default>true</default>
-	</option>
-	<option name="ejecter_automount" type="bool">
-		<_short>Ejecter Automount Removable Drives</_short>
+	  </option>
+	  <option name="automount" type="bool">
 		<default>true</default>
-	</option>
+	  </option>
 	</group>
-	</plugin>
+  </plugin>
 </wf-panel-pi>

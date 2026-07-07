@@ -681,6 +681,7 @@ void ejecter_init (EjecterPlugin *ej)
     gtk_button_set_relief (GTK_BUTTON (ej->plugin), GTK_RELIEF_NONE);
 #ifndef LXPLUG
     g_signal_connect (ej->plugin, "clicked", G_CALLBACK (ejecter_button_clicked), ej);
+    add_long_press (ej->plugin, NULL, NULL);
 #endif
 
     /* Set up variables */

@@ -20,7 +20,7 @@ Description: Ejecter plugin for lxpanel-pi
 Package: wfplug-ejecter
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
- wf-panel-pi (>=1.10), eject, pplug-ejecter-data
+ wf-panel-pi (>=1.18), eject, pplug-ejecter-data
 Description: Ejecter plugin for wf-panel-pi
  Plugin for wf-panel-pi to safely eject USB devices before removal.
 

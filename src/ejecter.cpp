@@ -29,38 +29,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ejecter.hpp"
 
 extern "C" {
-    WayfireWidget *create () { return new WayfireEjecter; }
-    void destroy (WayfireWidget *w) { delete w; }
+    PanelWidget *create () { return new WidgetEjecter; }
+    void destroy (PanelWidget *w) { delete w; }
 
     const conf_table_t *config_params (void) { return conf_table; };
     const char *display_name (void) { return PLUGIN_TITLE; };
     const char *package_name (void) { return GETTEXT_PACKAGE; };
 }
 
-void WayfireEjecter::command (const char *cmd)
+void WidgetEjecter::command (const char *cmd)
 {
     ejecter_control_msg (ej, cmd);
 }
 
-bool WayfireEjecter::set_icon (void)
+bool WidgetEjecter::set_icon (void)
 {
     ejecter_update_display (ej);
     return false;
 }
 
-void WayfireEjecter::read_settings (void)
+void WidgetEjecter::read_settings (void)
 {
     ej->autohide = autohide;
     ej->automount = automount;
 }
 
-void WayfireEjecter::settings_changed_cb (void)
+void WidgetEjecter::settings_changed_cb (void)
 {
     read_settings ();
     ejecter_update_display (ej);
 }
 
-void WayfireEjecter::init (Gtk::HBox *container)
+void WidgetEjecter::init (Gtk::HBox *container)
 {
     /* Create the button */
     plugin = std::make_unique <Gtk::Button> ();
@@ -70,18 +70,18 @@ void WayfireEjecter::init (Gtk::HBox *container)
     /* Setup structure */
     ej = g_new0 (EjecterPlugin, 1);
     ej->plugin = (GtkWidget *)((*plugin).gobj());
-    icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WayfireEjecter::set_icon));
+    icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WidgetEjecter::set_icon));
 
     /* Initialise the plugin */
     read_settings ();
     ejecter_init (ej);
 
     /* Setup callbacks */
-    autohide.set_callback (sigc::mem_fun (*this, &WayfireEjecter::settings_changed_cb));
-    automount.set_callback (sigc::mem_fun (*this, &WayfireEjecter::settings_changed_cb));
+    autohide.set_callback (sigc::mem_fun (*this, &WidgetEjecter::settings_changed_cb));
+    automount.set_callback (sigc::mem_fun (*this, &WidgetEjecter::settings_changed_cb));
 }
 
-WayfireEjecter::~WayfireEjecter()
+WidgetEjecter::~WidgetEjecter()
 {
     icon_timer.disconnect ();
     ejecter_destructor (ej);

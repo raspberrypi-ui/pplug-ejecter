@@ -36,7 +36,7 @@ extern "C" {
 #include "ejecter.h"
 }
 
-class WayfireEjecter : public WayfireWidget
+class WidgetEjecter : public PanelWidget
 {
     std::unique_ptr <Gtk::Button> plugin;
 
@@ -52,7 +52,7 @@ class WayfireEjecter : public WayfireWidget
 
     void init (Gtk::HBox *container) override;
     void command (const char *cmd) override;
-    virtual ~WayfireEjecter ();
+    virtual ~WidgetEjecter ();
     bool set_icon (void);
     void read_settings (void);
     void settings_changed_cb (void);

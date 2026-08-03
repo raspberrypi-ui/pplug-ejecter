@@ -64,9 +64,9 @@ typedef struct {
 /*----------------------------------------------------------------------------*/
 
 conf_table_t conf_table[3] = {
-    {CONF_TYPE_BOOL, "autohide",    N_("Hide icon when no devices"),    NULL},
-    {CONF_TYPE_BOOL, "automount",   N_("Automount removable devices"),  NULL},
-    {CONF_TYPE_NONE,  NULL,         NULL,                               NULL}
+    {CONF_TYPE_BOOL, "autohide",    N_("Hide icon when no devices"),    NULL,   "true"  },
+    {CONF_TYPE_BOOL, "automount",   N_("Automount removable devices"),  NULL,   "true"  },
+    {CONF_TYPE_NONE,  NULL,         NULL,                               NULL,   NULL    }
 };
 
 /*----------------------------------------------------------------------------*/

@@ -42,9 +42,6 @@ class WidgetEjecter : public PanelWidget
 
     sigc::connection icon_timer;
 
-    WfOption <bool> autohide {"ejecter/autohide"};
-    WfOption <bool> automount {"ejecter/automount"};
-
     /* plugin */
     EjecterPlugin *ej;
 
@@ -55,7 +52,7 @@ class WidgetEjecter : public PanelWidget
     virtual ~WidgetEjecter ();
     bool set_icon (void);
     void read_settings (void);
-    void settings_changed_cb (void);
+    void handle_config_reload (void);
 };
 
 #endif /* end of include guard: WIDGETS_EJECTER_HPP */

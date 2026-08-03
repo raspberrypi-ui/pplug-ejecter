@@ -50,13 +50,16 @@ bool WidgetEjecter::set_icon (void)
 
 void WidgetEjecter::read_settings (void)
 {
-    ej->autohide = autohide;
-    ej->automount = automount;
+    conf_table[0].value = (void *) &ej->autohide;
+    conf_table[1].value = (void *) &ej->automount;
+
+    load_configuration_data (PLUGIN_NAME, conf_table);
 }
 
-void WidgetEjecter::settings_changed_cb (void)
+void WidgetEjecter::handle_config_reload (void)
 {
-    read_settings ();
+    load_configuration_data (PLUGIN_NAME, conf_table);
+
     ejecter_update_display (ej);
 }
 
@@ -75,10 +78,6 @@ void WidgetEjecter::init (Gtk::HBox *container)
     /* Initialise the plugin */
     read_settings ();
     ejecter_init (ej);
-
-    /* Setup callbacks */
-    autohide.set_callback (sigc::mem_fun (*this, &WidgetEjecter::settings_changed_cb));
-    automount.set_callback (sigc::mem_fun (*this, &WidgetEjecter::settings_changed_cb));
 }
 
 WidgetEjecter::~WidgetEjecter()

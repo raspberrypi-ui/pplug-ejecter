@@ -1,3 +1,2 @@
 usr/lib/${DEB_HOST_MULTIARCH}/wf-panel-pi/libejecter.so
-usr/share/wf-panel-pi/metadata/ejecter.xml
 usr/share/locale/*/LC_MESSAGES/wfplug_ejecter.mo

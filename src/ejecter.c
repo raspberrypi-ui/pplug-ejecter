@@ -642,6 +642,12 @@ void ejecter_update_display (EjecterPlugin * ej)
     update_icon (ej);
 }
 
+void ejecter_set_values (EjecterPlugin * ej)
+{
+    conf_table[0].value = (void *) &ej->autohide;
+    conf_table[1].value = (void *) &ej->automount;
+}
+
 /* Handler for control message */
 gboolean ejecter_control_msg (EjecterPlugin *ej, const char *cmd)
 {
@@ -752,13 +758,8 @@ static GtkWidget *ejecter_constructor (LXPanel *panel, config_setting_t *setting
     ej->plugin = gtk_button_new ();
     lxpanel_plugin_set_data (ej->plugin, ej, ejecter_destructor);
 
-    /* Set config defaults */
-    ej->autohide = TRUE;
-    ej->automount = TRUE;
-
     /* Read config */
-    conf_table[0].value = (void *) &ej->autohide;
-    conf_table[1].value = (void *) &ej->automount;
+    ejecter_set_values (ej);
     lxplug_read_settings (ej->settings, conf_table);
 
     ejecter_init (ej);

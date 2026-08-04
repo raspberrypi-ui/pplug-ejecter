@@ -64,6 +64,7 @@ extern conf_table_t conf_table[3];
 /*----------------------------------------------------------------------------*/
 
 extern void ejecter_init (EjecterPlugin *ej);
+extern void ejecter_set_values (EjecterPlugin *ej);
 extern void ejecter_update_display (EjecterPlugin *ej);
 extern gboolean ejecter_control_msg (EjecterPlugin *ej, const char *cmd);
 extern void ejecter_destructor (gpointer user_data);

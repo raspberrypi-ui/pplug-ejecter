@@ -48,19 +48,9 @@ bool WidgetEjecter::set_icon (void)
     return false;
 }
 
-void WidgetEjecter::read_settings (void)
-{
-    conf_table[0].value = (void *) &ej->autohide;
-    conf_table[1].value = (void *) &ej->automount;
-
-    load_configuration_data (PLUGIN_NAME, conf_table);
-}
-
 void WidgetEjecter::handle_config_reload (void)
 {
-    load_configuration_data (PLUGIN_NAME, conf_table);
-
-    ejecter_update_display (ej);
+    if (load_configuration_data (PLUGIN_NAME, conf_table)) ejecter_update_display (ej);
 }
 
 void WidgetEjecter::init (Gtk::HBox *container)
@@ -76,7 +66,8 @@ void WidgetEjecter::init (Gtk::HBox *container)
     icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WidgetEjecter::set_icon));
 
     /* Initialise the plugin */
-    read_settings ();
+    ejecter_set_values (ej);
+    load_configuration_data (PLUGIN_NAME, conf_table);
     ejecter_init (ej);
 }
 

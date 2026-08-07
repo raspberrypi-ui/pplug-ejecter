@@ -37,23 +37,22 @@ extern "C" {
     const char *package_name (void) { return GETTEXT_PACKAGE; };
 }
 
-void WidgetEjecter::command (const char *cmd)
+void WidgetEjecter::widget_command (const char *cmd)
 {
     ejecter_control_msg (ej, cmd);
 }
 
-bool WidgetEjecter::set_icon (void)
+void WidgetEjecter::widget_set_icon (void)
 {
     ejecter_update_display (ej);
-    return false;
 }
 
-void WidgetEjecter::handle_config_reload (void)
+void WidgetEjecter::widget_config_reload (void)
 {
     if (load_configuration_data (PLUGIN_NAME, conf_table)) ejecter_update_display (ej);
 }
 
-void WidgetEjecter::init (Gtk::HBox *container)
+void WidgetEjecter::widget_init (Gtk::HBox *container)
 {
     /* Create the button */
     plugin = std::make_unique <Gtk::Button> ();
@@ -63,7 +62,6 @@ void WidgetEjecter::init (Gtk::HBox *container)
     /* Setup structure */
     ej = g_new0 (EjecterPlugin, 1);
     ej->plugin = (GtkWidget *)((*plugin).gobj());
-    icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WidgetEjecter::set_icon));
 
     /* Initialise the plugin */
     ejecter_set_values (ej);
@@ -73,7 +71,6 @@ void WidgetEjecter::init (Gtk::HBox *container)
 
 WidgetEjecter::~WidgetEjecter()
 {
-    icon_timer.disconnect ();
     ejecter_destructor (ej);
 }
 

@@ -1,3 +1,9 @@
+pplug-ejecter (1.13) trixie; urgency=medium
+
+  * Modify for latest plugin architecture
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 07 Aug 2026 10:21:56 +0100
+
 pplug-ejecter (1.12) trixie; urgency=medium
 
   * Remove WfOptions

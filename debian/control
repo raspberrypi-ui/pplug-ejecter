@@ -13,14 +13,14 @@ Homepage: http://raspberrypi.com/
 Package: lpplug-ejecter
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
- lxpanel-pi (>=1.8), eject, pplug-ejecter-data
+ eject, pplug-ejecter-data
 Description: Ejecter plugin for lxpanel-pi
  Plugin for lxpanel-pi to safely eject USB devices before removal.
 
 Package: wfplug-ejecter
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
- wf-panel-pi (>=1.23), eject, pplug-ejecter-data
+ eject, pplug-ejecter-data
 Description: Ejecter plugin for wf-panel-pi
  Plugin for wf-panel-pi to safely eject USB devices before removal.
 

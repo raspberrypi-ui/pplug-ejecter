@@ -28,11 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <locale.h>
 #include <glib/gi18n.h>
 
-#ifdef LXPLUG
 #include "plugin.h"
-#else
-#include "lxutils.h"
-#endif
 
 #include "ejecter.h"
 
@@ -96,7 +92,8 @@ static void update_icon (EjecterPlugin *ej);
 static void show_menu (EjecterPlugin *ej);
 static void hide_menu (EjecterPlugin *ej);
 static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d);
-static void ejecter_button_clicked (GtkWidget *, EjecterPlugin * ej);
+static void create_mount_notification (GVolume *vol);
+static void clear_mount_notification (const char *name);
 
 /*----------------------------------------------------------------------------*/
 /* Function definitions                                                       */
@@ -215,29 +212,7 @@ static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data)
 
 static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
 {
-    if (g_volume_mount_finish (vol, res, NULL))
-    {
-#ifndef LXPLUG
-        GDrive *drv = g_volume_get_drive (vol);
-        GMount *mnt = g_volume_get_mount (vol);
-        GFile *root = g_mount_get_root (mnt);
-        char *name = g_drive_get_name (drv);
-        char *msg = g_strdup_printf (_("Removable drive %s connected"), name);
-        char *path = g_file_get_path (root);
-
-        GNotification *not = g_notification_new (msg);
-        g_notification_add_button_with_target (not, _("Open"), "app.open-mount", "s", path);
-        g_application_send_notification (g_application_get_default (), name, not);
-        g_object_unref (not);
-
-        g_free (path);
-        g_free (msg);
-        g_free (name);
-        g_object_unref (root);
-        g_object_unref (mnt);
-        g_object_unref (drv);
-#endif
-    }
+    if (g_volume_mount_finish (vol, res, NULL)) create_mount_notification (vol);
 }
 
 #ifndef LXPLUG
@@ -291,9 +266,7 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
         char *name = g_drive_get_name (drive);
         if (strncmp (name, "RPI RP2", 7))
         {
-#ifndef LXPLUG
-            g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+            clear_mount_notification (name);
             wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
         }
         g_free (name);
@@ -375,9 +348,7 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     if (err == NULL)
     {
         DEBUG ("EJECT COMPLETE");
-#ifndef LXPLUG
-        g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+        clear_mount_notification (name);
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
@@ -404,9 +375,7 @@ static void stop_done (GObject *source_object, GAsyncResult *res, gpointer data)
     if (err == NULL)
     {
         DEBUG ("STOP COMPLETE");
-#ifndef LXPLUG
-        g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+        clear_mount_notification (name);
         buffer = g_strdup_printf (_("%s has been stopped\nIt is now safe to remove the device"), name);
     }
     else
@@ -433,9 +402,7 @@ static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer 
     if (err == NULL)
     {
         DEBUG ("VOL EJECT COMPLETE");
-#ifndef LXPLUG
-        g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+        clear_mount_notification (name);
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
@@ -465,9 +432,7 @@ static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointe
     if (err == NULL)
     {
         DEBUG ("VOL UNMOUNT COMPLETE");
-#ifndef LXPLUG
-        g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+        clear_mount_notification (name);
         buffer = g_strdup_printf (_("%s has been unmounted\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
@@ -624,6 +589,37 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
     return item;
 }
 
+static void create_mount_notification (GVolume *vol)
+{
+#ifndef LXPLUG
+    GDrive *drv = g_volume_get_drive (vol);
+    GMount *mnt = g_volume_get_mount (vol);
+    GFile *root = g_mount_get_root (mnt);
+    char *name = g_drive_get_name (drv);
+    char *msg = g_strdup_printf (_("Removable drive %s connected"), name);
+    char *path = g_file_get_path (root);
+
+    GNotification *not = g_notification_new (msg);
+    g_notification_add_button_with_target (not, _("Open"), "app.open-mount", "s", path);
+    g_application_send_notification (g_application_get_default (), name, not);
+    g_object_unref (not);
+
+    g_free (path);
+    g_free (msg);
+    g_free (name);
+    g_object_unref (root);
+    g_object_unref (mnt);
+    g_object_unref (drv);
+#endif
+}
+
+static void clear_mount_notification (const char *name)
+{
+#ifndef LXPLUG
+    g_application_withdraw_notification (g_application_get_default (), name);
+#endif
+}
+
 /*----------------------------------------------------------------------------*/
 /* wf-panel plugin functions                                                  */
 /*----------------------------------------------------------------------------*/
@@ -685,10 +681,8 @@ void ejecter_init (EjecterPlugin *ej)
 
     /* Set up button */
     gtk_button_set_relief (GTK_BUTTON (ej->plugin), GTK_RELIEF_NONE);
-#ifndef LXPLUG
     g_signal_connect (ej->plugin, "clicked", G_CALLBACK (ejecter_button_clicked), ej);
-    ej->gesture = add_long_press (ej->plugin, NULL, NULL);
-#endif
+    wrap_add_longpress (ej->gesture, ej->plugin, NULL, NULL);
 
     /* Set up variables */
     ej->popup = NULL;
@@ -731,102 +725,13 @@ void ejecter_destructor (gpointer user_data)
     EjecterPlugin *ej = (EjecterPlugin *) user_data;
     int i;
 
-#ifndef LXPLUG
-    if (ej->gesture) g_object_unref (ej->gesture);
-#endif
+    wrap_free_gesture (ej->gesture);
 
     for (i = 0; i < 7; i++) g_signal_handler_disconnect (ej->monitor, ej->handlers[i]);
     g_object_unref (ej->monitor);
 
     g_free (ej);
 }
-
-/*----------------------------------------------------------------------------*/
-/* LXPanel plugin functions                                                   */
-/*----------------------------------------------------------------------------*/
-#ifdef LXPLUG
-
-/* Constructor */
-static GtkWidget *ejecter_constructor (LXPanel *panel, config_setting_t *settings)
-{
-    /* Allocate and initialize plugin context */
-    EjecterPlugin *ej = g_new0 (EjecterPlugin, 1);
-
-    /* Allocate top level widget and set into plugin widget pointer. */
-    ej->panel = panel;
-    ej->settings = settings;
-    ej->plugin = gtk_button_new ();
-    lxpanel_plugin_set_data (ej->plugin, ej, ejecter_destructor);
-
-    /* Read config */
-    ejecter_set_values (ej);
-    lxplug_read_settings (ej->settings, conf_table);
-
-    ejecter_init (ej);
-
-    return ej->plugin;
-}
-
-/* Handler for button press */
-static gboolean ejecter_button_press_event (GtkWidget *widget, GdkEventButton *event, LXPanel *)
-{
-    EjecterPlugin *ej = lxpanel_plugin_get_data (widget);
-    if (event->button == 1)
-    {
-        ejecter_button_clicked (widget, ej);
-        return TRUE;
-    }
-    else return FALSE;
-}
-
-/* Handler for system config changed message from panel */
-static void ejecter_configuration_changed (LXPanel *, GtkWidget *plugin)
-{
-    EjecterPlugin *ej = lxpanel_plugin_get_data (plugin);
-    ejecter_update_display (ej);
-}
-
-/* Handler for control message */
-static gboolean ejecter_control (GtkWidget *plugin, const char *cmd)
-{
-    EjecterPlugin *ej = lxpanel_plugin_get_data (plugin);
-    return ejecter_control_msg (ej, cmd);
-}
-
-/* Apply changes from config dialog */
-static gboolean ejecter_apply_configuration (gpointer user_data)
-{
-    EjecterPlugin *ej = lxpanel_plugin_get_data (GTK_WIDGET (user_data));
-
-    lxplug_write_settings (ej->settings, conf_table);
-
-    ejecter_update_display (ej);
-    return FALSE;
-}
-
-/* Display configuration dialog */
-static GtkWidget *ejecter_configure (LXPanel *panel, GtkWidget *plugin)
-{
-    return lxpanel_generic_config_dlg_new (_(PLUGIN_TITLE), panel,
-        ejecter_apply_configuration, plugin,
-        conf_table);
-}
-
-int module_lxpanel_gtk_version = 1;
-char module_name[] = PLUGIN_NAME;
-
-/* Plugin descriptor */
-LXPanelPluginInit fm_module_init_lxpanel_gtk = {
-    .name = PLUGIN_TITLE,
-    .description = N_("Ejects mounted drives"),
-    .new_instance = ejecter_constructor,
-    .reconfigure = ejecter_configuration_changed,
-    .button_press_event = ejecter_button_press_event,
-    .config = ejecter_configure,
-    .control = ejecter_control,
-    .gettext_package = GETTEXT_PACKAGE
-};
-#endif
 
 /* End of file */
 /*----------------------------------------------------------------------------*/

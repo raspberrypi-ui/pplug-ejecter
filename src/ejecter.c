@@ -78,6 +78,7 @@ static void add_seq_for_drive (EjecterPlugin *ej, GDrive *drive, int seq);
 static void handle_mount_in (GtkWidget *, GMount *mount, gpointer data);
 static void handle_mount_out (GtkWidget *, GMount *mount, gpointer data);
 static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data);
+static void mount_done (GVolume *vol, GAsyncResult *res, gpointer data);
 static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data);
 static void handle_volume_out (GtkWidget *, GVolume *vol, gpointer data);
 static void handle_drive_in (GtkWidget *, GDrive *drive, gpointer data);
@@ -92,8 +93,8 @@ static void update_icon (EjecterPlugin *ej);
 static void show_menu (EjecterPlugin *ej);
 static void hide_menu (EjecterPlugin *ej);
 static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d);
-static void create_mount_notification (GVolume *vol);
-static void clear_mount_notification (const char *name);
+static void create_mount_notification (EjecterPlugin *ej, GVolume *vol);
+static void clear_mount_notification (EjecterPlugin *ej, const char *name);
 
 /*----------------------------------------------------------------------------*/
 /* Function definitions                                                       */
@@ -210,12 +211,12 @@ static void handle_mount_pre (GtkWidget *, GMount *mount, gpointer data)
     log_eject (ej, g_mount_get_drive (mount));
 }
 
-static void mount_done (GVolume *vol, GAsyncResult *res, gpointer)
+static void mount_done (GVolume *vol, GAsyncResult *res, gpointer data)
 {
-    if (g_volume_mount_finish (vol, res, NULL)) create_mount_notification (vol);
+    EjecterPlugin *ej = (EjecterPlugin *) data;
+    if (g_volume_mount_finish (vol, res, NULL)) create_mount_notification (ej, vol);
 }
 
-#ifndef LXPLUG
 static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
 {
     char *cmd = g_strdup_printf ("pcmanfm %s &", g_variant_get_string (param, NULL));
@@ -223,7 +224,6 @@ static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
     g_free (cmd);
     return FALSE;
 }
-#endif
 
 static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
 {
@@ -231,7 +231,7 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
     if (ej->automount && g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
-        g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, NULL);
+        g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, ej);
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);
@@ -266,7 +266,7 @@ static void handle_drive_out (GtkWidget *, GDrive *drive, gpointer data)
         char *name = g_drive_get_name (drive);
         if (strncmp (name, "RPI RP2", 7))
         {
-            clear_mount_notification (name);
+            clear_mount_notification (ej, name);
             wrap_notify (ej->panel, _("Drive was removed without ejecting\nPlease use menu to eject before removal"));
         }
         g_free (name);
@@ -348,7 +348,7 @@ static void eject_done (GObject *source_object, GAsyncResult *res, gpointer data
     if (err == NULL)
     {
         DEBUG ("EJECT COMPLETE");
-        clear_mount_notification (name);
+        clear_mount_notification (ej, name);
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
     }
@@ -375,7 +375,7 @@ static void stop_done (GObject *source_object, GAsyncResult *res, gpointer data)
     if (err == NULL)
     {
         DEBUG ("STOP COMPLETE");
-        clear_mount_notification (name);
+        clear_mount_notification (ej, name);
         buffer = g_strdup_printf (_("%s has been stopped\nIt is now safe to remove the device"), name);
     }
     else
@@ -402,7 +402,7 @@ static void vol_eject_done (GObject *source_object, GAsyncResult *res, gpointer 
     if (err == NULL)
     {
         DEBUG ("VOL EJECT COMPLETE");
-        clear_mount_notification (name);
+        clear_mount_notification (ej, name);
         buffer = g_strdup_printf (_("%s has been ejected\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
@@ -432,7 +432,7 @@ static void vol_unmount_done (GObject *source_object, GAsyncResult *res, gpointe
     if (err == NULL)
     {
         DEBUG ("VOL UNMOUNT COMPLETE");
-        clear_mount_notification (name);
+        clear_mount_notification (ej, name);
         buffer = g_strdup_printf (_("%s has been unmounted\nIt is now safe to remove the device"), name);
         wrap_notify (ej->panel, buffer);
         add_seq_for_drive (ej, drv, wrap_notify (ej->panel, buffer));
@@ -589,9 +589,10 @@ static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d)
     return item;
 }
 
-static void create_mount_notification (GVolume *vol)
+static void create_mount_notification (EjecterPlugin *ej, GVolume *vol)
 {
-#ifndef LXPLUG
+	if (!ej->app) return;
+
     GDrive *drv = g_volume_get_drive (vol);
     GMount *mnt = g_volume_get_mount (vol);
     GFile *root = g_mount_get_root (mnt);
@@ -601,7 +602,7 @@ static void create_mount_notification (GVolume *vol)
 
     GNotification *not = g_notification_new (msg);
     g_notification_add_button_with_target (not, _("Open"), "app.open-mount", "s", path);
-    g_application_send_notification (g_application_get_default (), name, not);
+    g_application_send_notification (ej->app, name, not);
     g_object_unref (not);
 
     g_free (path);
@@ -610,14 +611,13 @@ static void create_mount_notification (GVolume *vol)
     g_object_unref (root);
     g_object_unref (mnt);
     g_object_unref (drv);
-#endif
 }
 
-static void clear_mount_notification (const char *name)
+static void clear_mount_notification (EjecterPlugin *ej, const char *name)
 {
-#ifndef LXPLUG
-    g_application_withdraw_notification (g_application_get_default (), name);
-#endif
+	if (!ej->app) return;
+
+    g_application_withdraw_notification (ej->app, name);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -713,11 +713,14 @@ void ejecter_init (EjecterPlugin *ej)
 
     log_init_mounts (ej);
 
-#ifndef LXPLUG
-    GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
-    g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
-    g_action_map_add_action (G_ACTION_MAP (g_application_get_default ()), G_ACTION (act));
-#endif
+	ej->app = g_application_get_default ();
+	if (ej->app && !g_application_get_is_registered (ej->app)) ej->app = NULL;
+	if (ej->app)
+	{
+		GSimpleAction *act = g_simple_action_new_stateful ("open-mount", G_VARIANT_TYPE ("s"), g_variant_new_string (""));
+		g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
+		g_action_map_add_action (G_ACTION_MAP (ej->app), G_ACTION (act));
+	}
 }
 
 void ejecter_destructor (gpointer user_data)

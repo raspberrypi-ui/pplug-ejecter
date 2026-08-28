@@ -64,20 +64,11 @@ static void ejecter_configuration_changed (LXPanel *, GtkWidget *plugin)
     ejecter_update_display (ej);
 }
 
-/* Handler for control message */
-static gboolean ejecter_control (GtkWidget *plugin, const char *cmd)
-{
-    EjecterPlugin *ej = lxpanel_plugin_get_data (plugin);
-    return ejecter_control_msg (ej, cmd);
-}
-
 /* Apply changes from config dialog */
 static gboolean ejecter_apply_configuration (gpointer user_data)
 {
     EjecterPlugin *ej = lxpanel_plugin_get_data (GTK_WIDGET (user_data));
-
     lxplug_write_settings (ej->settings, conf_table);
-
     ejecter_update_display (ej);
     return FALSE;
 }
@@ -90,18 +81,25 @@ static GtkWidget *ejecter_configure (LXPanel *panel, GtkWidget *plugin)
         conf_table);
 }
 
+/* Handler for control message */
+static gboolean ejecter_control (GtkWidget *plugin, const char *cmd)
+{
+    EjecterPlugin *ej = lxpanel_plugin_get_data (plugin);
+    return ejecter_control_msg (ej, cmd);
+}
+
 int module_lxpanel_gtk_version = 1;
 char module_name[] = PLUGIN_NAME;
 
 /* Plugin descriptor */
 LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .name = PLUGIN_TITLE,
+    .gettext_package = GETTEXT_PACKAGE,
     .description = N_("Ejects mounted drives"),
     .new_instance = ejecter_constructor,
     .reconfigure = ejecter_configuration_changed,
     .config = ejecter_configure,
-    .control = ejecter_control,
-    .gettext_package = GETTEXT_PACKAGE
+    .control = ejecter_control
 };
 
 /* End of file */

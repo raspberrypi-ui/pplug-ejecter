@@ -34,14 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct 
 {
     GtkWidget *plugin;
-
-#ifdef LXPLUG
-    LXPanel *panel;                 /* Back pointer to panel */
-    config_setting_t *settings;     /* Plugin settings */
-#else
     GtkGesture *gesture;
-#endif
-
     GtkWidget *tray_icon;           /* Displayed image */
     GtkWidget *popup;               /* Popup message */
     GtkWidget *alignment;           /* Alignment object in popup message */
@@ -56,6 +49,7 @@ typedef struct
     guint hide_timer;
     gulong handlers[7];
     GApplication *app;
+    LXPLUG_VARS
 } EjecterPlugin;
 
 extern conf_table_t conf_table[3];

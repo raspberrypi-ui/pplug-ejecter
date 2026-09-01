@@ -1,0 +1,140 @@
+# Georgian translation for lpplug_ejecter.
+# Copyright (C) 2026 lpplug_ejecter's authors.
+# This file is distributed under the same license as the lpplug_ejecter package.
+# Ekaterine Papava <papava.e@gtu.ge>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lpplug_ejecter\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-15 12:33+0200\n"
+"PO-Revision-Date: 2026-08-30 05:24+0200\n"
+"Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+#: src/ejecter.c:67
+msgid "Hide icon when no devices"
+msgstr "ხატულას დამალვა მოწყობილობების არარსებობისას"
+
+#: src/ejecter.c:68
+msgid "Automount removable devices"
+msgstr "მოხსნადი მოწყობილობების ავტომიმაგრება"
+
+#: src/ejecter.c:225
+#, c-format
+msgid "Removable drive %s connected"
+msgstr "მოხსნადი დისკი %s დაკავშირებულია"
+
+#: src/ejecter.c:229
+msgid "Open"
+msgstr "გახსნა"
+
+#: src/ejecter.c:297
+msgid ""
+"Drive was removed without ejecting\n"
+"Please use menu to eject before removal"
+msgstr ""
+"დისკი მოხსნილია ამოღების გარეშე\n"
+"ამოღებამდე გამოიყენეთ ამოღების მენიუ"
+
+#: src/ejecter.c:381 src/ejecter.c:439
+#, c-format
+msgid ""
+"%s has been ejected\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s მოხსნილია\n"
+"ახლა მოწყობილობის მოხსნა უსაფრთხოა"
+
+#: src/ejecter.c:387 src/ejecter.c:446
+#, c-format
+msgid ""
+"Failed to eject %s\n"
+"%s"
+msgstr ""
+"%s-ის მოხსნის შეცდომა\n"
+"%s"
+
+#: src/ejecter.c:410
+#, c-format
+msgid ""
+"%s has been stopped\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s გაჩერებულია\n"
+"ახლა მოწყობილობის მოხსნა უსაფრთხოა"
+
+#: src/ejecter.c:415
+#, c-format
+msgid ""
+"Failed to stop %s\n"
+"%s"
+msgstr ""
+"%s-ის გაჩერება ჩავარდა\n"
+"%s"
+
+#: src/ejecter.c:471
+#, c-format
+msgid ""
+"%s has been unmounted\n"
+"It is now safe to remove the device"
+msgstr ""
+"%s მიმაგრება გაუქმდა\n"
+"ახლა მოწყობილობის მოხსნა უსაფრთხოა"
+
+#: src/ejecter.c:478
+#, c-format
+msgid ""
+"Failed to unmount %s\n"
+"%s"
+msgstr ""
+"%s-ის მიმაგრების გაუქმება ჩავარდა\n"
+"%s"
+
+#: src/ejecter.c:678
+msgid "Select a drive in menu to eject safely"
+msgstr "აირჩიეთ მენიუში დისკი უსაფრთხოდ ამოსაღებად"
+
+#: src/ejecter.c:815
+msgid "Ejects mounted drives"
+msgstr "ამოიღებს მიმაგრებულ დისკებს"
+
+#. End of file
+#. ----------------------------------------------------------------------------
+#. ============================================================================
+#. Copyright (c) 2018-2025 Raspberry Pi
+#. All rights reserved.
+#.
+#. Redistribution and use in source and binary forms, with or without
+#. modification, are permitted provided that the following conditions are met:
+#. * Redistributions of source code must retain the above copyright
+#. notice, this list of conditions and the following disclaimer.
+#. * Redistributions in binary form must reproduce the above copyright
+#. notice, this list of conditions and the following disclaimer in the
+#. documentation and/or other materials provided with the distribution.
+#. * Neither the name of the copyright holder nor the
+#. names of its contributors may be used to endorse or promote products
+#. derived from this software without specific prior written permission.
+#.
+#. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#. ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#. WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#. DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+#. DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#. (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#. LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#. ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#. (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#. SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#. ============================================================================
+#. ----------------------------------------------------------------------------
+#. Typedefs and macros
+#. ----------------------------------------------------------------------------
+#: src/ejecter.h:32
+msgid "Ejecter"
+msgstr "ამომღები"

@@ -37,11 +37,6 @@ extern "C" {
     const char *package_name (void) { return GETTEXT_PACKAGE; };
 }
 
-void WidgetEjecter::widget_command (const char *cmd)
-{
-    ejecter_control_msg (ej, cmd);
-}
-
 void WidgetEjecter::widget_set_icon (void)
 {
     ejecter_update_display (ej);
@@ -50,6 +45,11 @@ void WidgetEjecter::widget_set_icon (void)
 void WidgetEjecter::widget_config_reload (void)
 {
     if (load_configuration_data (PLUGIN_NAME, conf_table)) ejecter_update_display (ej);
+}
+
+void WidgetEjecter::widget_command (const char *cmd)
+{
+    ejecter_control_msg (ej, cmd);
 }
 
 void WidgetEjecter::widget_init (Gtk::HBox *container)

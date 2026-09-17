@@ -44,7 +44,7 @@ void WidgetEjecter::widget_set_icon (void)
 
 void WidgetEjecter::widget_config_reload (void)
 {
-    if (load_configuration_data (PLUGIN_NAME, conf_table)) ejecter_update_display (ej);
+    if (load_configuration_data (PLUGIN_NAME, conf_table)) ejecter_update_and_check (ej);
 }
 
 void WidgetEjecter::widget_command (const char *cmd)

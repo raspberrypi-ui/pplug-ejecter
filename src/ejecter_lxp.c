@@ -69,7 +69,7 @@ static gboolean ejecter_apply_configuration (gpointer user_data)
 {
     EjecterPlugin *ej = lxpanel_plugin_get_data (GTK_WIDGET (user_data));
     lxplug_write_settings (ej->settings, conf_table);
-    ejecter_update_display (ej);
+    ejecter_update_and_check (ej);
     return FALSE;
 }
 

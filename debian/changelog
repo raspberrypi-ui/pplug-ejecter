@@ -1,3 +1,9 @@
+pplug-ejecter (1.17) trixie; urgency=medium
+
+  * Disable pcmanfm automount if it is enabled in user config while automount is on
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 17 Sep 2026 18:21:18 +0100
+
 pplug-ejecter (1.16) trixie; urgency=medium
 
   * Version bump for build

@@ -95,6 +95,7 @@ static void hide_menu (EjecterPlugin *ej);
 static GtkWidget *create_menuitem (EjecterPlugin *ej, GDrive *d);
 static void create_mount_notification (EjecterPlugin *ej, GVolume *vol);
 static void clear_mount_notification (EjecterPlugin *ej, const char *name);
+static void check_pcmanfm_automount (void);
 
 /*----------------------------------------------------------------------------*/
 /* Function definitions                                                       */
@@ -620,6 +621,41 @@ static void clear_mount_notification (EjecterPlugin *ej, const char *name)
     g_application_withdraw_notification (ej->app, name);
 }
 
+static void check_pcmanfm_automount (void)
+{
+    char *user_config_file, *str;
+    GKeyFile *kf;
+    gsize len;
+    int val;
+
+    // pcmanfm defaults to not automounting, but if automount is enabled in the user config, turn it off
+    user_config_file = g_build_filename (g_get_user_config_dir (), "pcmanfm", "default", "pcmanfm.conf", NULL);
+    kf = g_key_file_new ();
+    g_key_file_load_from_file (kf, user_config_file, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+
+    val = 0;
+    val += g_key_file_get_integer (kf, "volume", "mount_on_startup", NULL);
+    val += g_key_file_get_integer (kf, "volume", "mount_removable", NULL);
+    val += g_key_file_get_integer (kf, "volume", "autorun", NULL);
+
+    if (val)
+    {
+        g_key_file_set_integer (kf, "volume", "mount_on_startup", 0);
+        g_key_file_set_integer (kf, "volume", "mount_removable", 0);
+        g_key_file_set_integer (kf, "volume", "autorun", 0);
+
+        str = g_key_file_to_data (kf, &len, NULL);
+        g_file_set_contents (user_config_file, str, len, NULL);
+
+        g_free (str);
+
+        system ("if pgrep pcmanfm > /dev/null ; then pcmanfm --reconfigure; fi");
+    }
+
+    g_key_file_free (kf);
+    g_free (user_config_file);
+}
+
 /*----------------------------------------------------------------------------*/
 /* wf-panel plugin functions                                                  */
 /*----------------------------------------------------------------------------*/
@@ -665,6 +701,12 @@ gboolean ejecter_control_msg (EjecterPlugin *ej, const char *cmd)
     }
     g_list_free_full (drives, g_object_unref);
     return TRUE;
+}
+
+void ejecter_update_and_check (EjecterPlugin * ej)
+{
+    ejecter_update_display (ej);
+    check_pcmanfm_automount ();
 }
 
 void ejecter_init (EjecterPlugin *ej)
@@ -721,6 +763,8 @@ void ejecter_init (EjecterPlugin *ej)
 		g_signal_connect (act, "activate", G_CALLBACK (open_mount), NULL);
 		g_action_map_add_action (G_ACTION_MAP (ej->app), G_ACTION (act));
 	}
+
+    if (ej->automount) check_pcmanfm_automount ();
 }
 
 void ejecter_destructor (gpointer user_data)

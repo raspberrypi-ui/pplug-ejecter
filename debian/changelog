@@ -1,3 +1,9 @@
+pplug-ejecter (1.18) trixie; urgency=medium
+
+  * Add tooltip for widget browser
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 21 Sep 2026 09:44:04 +0100
+
 pplug-ejecter (1.17) trixie; urgency=medium
 
   * Disable pcmanfm automount if it is enabled in user config while automount is on

@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*----------------------------------------------------------------------------*/
 
 #define PLUGIN_TITLE N_("Ejecter")
+#define PLUGIN_DESC N_("Ejects mounted drives")
 
 typedef struct 
 {

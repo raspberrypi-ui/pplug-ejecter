@@ -1,3 +1,9 @@
+pplug-ejecter (1.19) trixie; urgency=medium
+
+  * Add mount operation to prompt for passphrases for encrypted volumes
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 25 Sep 2026 11:01:51 +0100
+
 pplug-ejecter (1.18) trixie; urgency=medium
 
   * Add tooltip for widget browser

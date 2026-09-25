@@ -232,7 +232,12 @@ static void handle_volume_in (GtkWidget *, GVolume *vol, gpointer data)
     DEBUG ("VOLUME ADDED %s", g_volume_get_name (vol));
 
     if (ej->automount && g_volume_should_automount (vol) && g_volume_can_mount (vol) && !g_volume_get_mount (vol))
-        g_volume_mount (vol, 0, NULL, NULL, (GAsyncReadyCallback) mount_done, ej);
+    {
+        // mount operation allows prompting for passphrase of encrypted volumes
+        GMountOperation *op = gtk_mount_operation_new (NULL);
+        g_volume_mount (vol, 0, op, NULL, (GAsyncReadyCallback) mount_done, ej);
+        g_object_unref (op);
+    }
 
     if (ej->menu && gtk_widget_get_visible (ej->menu)) show_menu (ej);
     update_icon (ej);

@@ -1,3 +1,9 @@
+pplug-ejecter (1.20) trixie; urgency=medium
+
+  * Fix for mounting devices with spaces in label names
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 12 Oct 2026 11:45:48 +0100
+
 pplug-ejecter (1.19) trixie; urgency=medium
 
   * Add mount operation to prompt for passphrases for encrypted volumes

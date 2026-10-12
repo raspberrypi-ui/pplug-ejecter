@@ -220,7 +220,7 @@ static void mount_done (GVolume *vol, GAsyncResult *res, gpointer data)
 
 static gboolean open_mount (GSimpleAction *, GVariant *param, gpointer)
 {
-    char *cmd = g_strdup_printf ("pcmanfm %s &", g_variant_get_string (param, NULL));
+    char *cmd = g_strdup_printf ("pcmanfm '%s' &", g_variant_get_string (param, NULL));
     system (cmd);
     g_free (cmd);
     return FALSE;
